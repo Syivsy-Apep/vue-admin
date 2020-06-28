@@ -55,20 +55,13 @@
 </template>
 
 <script>
-import { reactive, ref, isRef, toRefs, onMounted } from "@vue/composition-api";
-import {
-  stripscript,
-  validateEmail,
-  validatePassword,
-  validateCode
-} from "@/utils/validate";
+import { stripscript,validateEmail,validatePassword,validateCode} from "@/utils/validate";
 export default {
   name: "login",
-  setup(props, context) {
-    //放置data数据、生命周期、自定义函数
-     let checkCode = (rule, value, callback) => {
-     ruleForm.code = stripscript(value);
-      value = ruleForm.code;
+  data() {
+    var checkCode = (rule, value, callback) => {
+      this.ruleForm.code = stripscript(value);
+      value = this.ruleForm.code;
       if (!value) {
         return callback(new Error("验证码不为空"));
       } else if (validateCode(value)) {
@@ -78,7 +71,7 @@ export default {
       }
     };
     //验证用户名
-    let validateUserName = (rule, value, callback) => {
+    var validateUserName = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请输入账号"));
       } else if (validateEmail(value)) {
@@ -88,9 +81,9 @@ export default {
       }
     };
     //验证密码
-    let validatePass = (rule, value, callback) => {
-     ruleForm.password = stripscript(value);
-      value = ruleForm.password;
+    var validatePass = (rule, value, callback) => {
+      this.ruleForm.password = stripscript(value);
+      value = this.ruleForm.password;
       if (value === "") {
         callback(new Error("请输入密码"));
       } else if (validatePassword(value)) {
@@ -99,63 +92,50 @@ export default {
         callback();
       }
     };
-    //验证重复密码
-    let validatePasss = (rule, value, callback) => {
+     //验证重复密码
+    var validatePasss = (rule, value, callback) => {
       this.ruleForm.passwords = stripscript(value);
       value = this.ruleForm.passwords;
       if (value === "") {
         callback(new Error("请输入密码"));
       } else if (validatePassword(value)) {
         callback(new Error("密码为6-20位数字加字母"));
-      } else if (value != this.ruleForm.password) {
-        callback(new Error("两次输入密码不同"));
-      } else {
+      } else if(value != this.ruleForm.password){
+           callback(new Error("两次输入密码不同"));
+      }else{
         callback();
       }
     };
-    const menuTab = reactive([
-      //声明单一对象时使用
-      { text: "登录", isActive: true, model: "login" },
-      { text: "注册", isActive: false, model: "register" }
-    ]);
-    const model = ref("login"); //声明基础数据类型变量时使用
-    //表单数据
-    const ruleForm = reactive({
-      username: "",
-      password: "",
-      passwords: "",
-      code: ""
-    });
-    //表单验证
-    const rules = reactive({
-      username: [{ validator: validateUserName, trigger: "blur" }],
-      password: [{ validator: validatePass, trigger: "blur" }],
-      passwords: [{ validator: validatePasss, trigger: "blur" }],
-      code: [{ validator: checkCode, trigger: "blur" }]
-    });
-
-    // console.log(isRef(model) ? "是一个基础数据类型" : "不是");
-    function useMousePosition() {
-      const pos = reactive({
-        x: 0,
-        y: 0
-      });
-      return toRefs(pos);
-    }
-    const { x, y } = useMousePosition();
-    // console.log(x.value);
-    /**
-     * 声明函数
-     */
-    const toggleMenu = data => {
-      menuTab.forEach(element => {
+    return {
+      menuTab: [
+        { text: "登录", isActive: true,model:"login"},
+        { text: "注册", isActive: false,model:"register"}
+      ],
+      ruleForm: {
+        username: "",
+        password: "",
+        passwords:"",
+        code: ""
+      },
+      model:'login',
+      rules: {
+        username: [{ validator: validateUserName, trigger: "blur" }],
+        password: [{ validator: validatePass, trigger: "blur" }],
+        passwords: [{ validator: validatePasss, trigger: "blur" }],
+        code: [{ validator: checkCode, trigger: "blur" }]
+      }
+    };
+  },
+  methods: {
+    toggleMenu(e) {
+      this.menuTab.forEach(element => {
         element.isActive = false;
       });
-      model.value = data.model;
-      data.isActive = true;
-    };
-    const submitForm = formName => {
-      context.refs[formName].validate(valid => {
+      this.model = e.model;
+      e.isActive = true;
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
         if (valid) {
           alert("submit!");
         } else {
@@ -163,24 +143,13 @@ export default {
           return false;
         }
       });
-    };
-    /**
-     * 生命周期
-     */
-    //挂载完成后
-    onMounted(() => {});
-
-    return {
-      menuTab,
-      model,
-      ruleForm,
-      rules,
-
-      toggleMenu,
-      submitForm
-    };
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
+    }
   },
-
+  created() {},
+  mounted() {}
 };
 </script>
 

@@ -21,6 +21,7 @@ export function validateEmail(value){
 }
 
 /* 验证密码 */
+
 export function validatePassword(value){
     let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/; 
     if(!reg.test(value)){
