@@ -50,11 +50,19 @@ module.exports = {
               warnings: true,
               errors: true
             },
-            host: "localhost",
+            host: "0.0.0.0",
             port: 8080, // 端口号
             https: false, // https:{type:Boolean}
-            open: false, //配置自动启动浏览器
+            open: true, //配置自动启动浏览器
             hotOnly: true, // 热更新
-            proxy: null
+            proxy: {
+                '/devApi': {
+                    target: "http://www.web-jshtml.cn/productapi/token", //API服务器的地址  http://www.web-jshtml.cn/api
+                    changeOrigin: true,
+                    pathRewrite: {
+                        '^/devApi': ''
+                    }
+                }
+            },
         }
 }

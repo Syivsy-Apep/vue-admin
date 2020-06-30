@@ -42,12 +42,17 @@
               <el-input v-model.number="ruleForm.code"></el-input>
             </el-col>
             <el-col :span="9">
-              <el-button type="success">获取验证码</el-button>
+              <el-button type="success" @click="getSms">获取验证码</el-button>
             </el-col>
           </el-row>
         </el-form-item>
         <el-form-item>
-          <el-button type="danger" @click="submitForm('ruleForm')" class="login_bt">登录</el-button>
+          <el-button
+            type="danger"
+            @click="submitForm('ruleForm')"
+            class="login_bt"
+            :disabled="loginButtonStatus"
+          >{{model === 'login' ? '登录' : '注册'}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -55,6 +60,7 @@
 </template>
 
 <script>
+import { GetSms } from "@/api/login";
 import { reactive, ref, isRef, toRefs, onMounted } from "@vue/composition-api";
 import {
   stripscript,
@@ -64,10 +70,20 @@ import {
 } from "@/utils/validate";
 export default {
   name: "login",
-  setup(props, context) {
+  setup(props, {refs,root}) {
+    // console.log(context);
+    /**
+     *  attrs: (...) == this.$attrs
+        emit: (...) == this.$emit
+        isServer: (...) == this.$isServer
+        listeners: (...) == this.$listeners
+        parent: (...) == this.parent
+        refs: (...) == this.refs
+        root: (...) == this
+     */
     //放置data数据、生命周期、自定义函数
-     let checkCode = (rule, value, callback) => {
-     ruleForm.code = stripscript(value);
+    let checkCode = (rule, value, callback) => {
+      ruleForm.code = stripscript(value);
       value = ruleForm.code;
       if (!value) {
         return callback(new Error("验证码不为空"));
@@ -89,7 +105,7 @@ export default {
     };
     //验证密码
     let validatePass = (rule, value, callback) => {
-     ruleForm.password = stripscript(value);
+      ruleForm.password = stripscript(value);
       value = ruleForm.password;
       if (value === "") {
         callback(new Error("请输入密码"));
@@ -113,15 +129,21 @@ export default {
         callback();
       }
     };
+    /**
+     * 声明数据
+     */
     const menuTab = reactive([
       //声明单一对象时使用
       { text: "登录", isActive: true, model: "login" },
       { text: "注册", isActive: false, model: "register" }
     ]);
+    //模块值
     const model = ref("login"); //声明基础数据类型变量时使用
+    //登录按钮禁用状态
+    const loginButtonStatus = ref(true);
     //表单数据
     const ruleForm = reactive({
-      username: "",
+      username: "1115050632@qq.com",
       password: "",
       passwords: "",
       code: ""
@@ -147,6 +169,7 @@ export default {
     /**
      * 声明函数
      */
+    //切换登录注册
     const toggleMenu = data => {
       menuTab.forEach(element => {
         element.isActive = false;
@@ -154,6 +177,7 @@ export default {
       model.value = data.model;
       data.isActive = true;
     };
+    //提交表单
     const submitForm = formName => {
       context.refs[formName].validate(valid => {
         if (valid) {
@@ -164,6 +188,15 @@ export default {
         }
       });
     };
+    //获取验证码
+    const getSms = () => {
+      //判断邮箱是否为空
+      if (ruleForm.username == "") {
+        root.$message.error('邮箱不能为空！！')
+        return false;
+      }
+      GetSms({ username: ruleForm.username });
+    };
     /**
      * 生命周期
      */
@@ -173,14 +206,15 @@ export default {
     return {
       menuTab,
       model,
+      loginButtonStatus,
       ruleForm,
       rules,
 
       toggleMenu,
-      submitForm
+      submitForm,
+      getSms
     };
-  },
-
+  }
 };
 </script>
 
